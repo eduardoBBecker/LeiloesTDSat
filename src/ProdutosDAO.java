@@ -12,9 +12,6 @@ public class ProdutosDAO {
 
     private conectaDAO conexao;
     private Connection conn;
-    PreparedStatement prep;
-    //ResultSet resultset;
-    //ArrayList<ProdutosDTO> listagem = new ArrayList<>();
 
     public ProdutosDAO() {
         this.conexao = new conectaDAO();
@@ -83,7 +80,7 @@ public class ProdutosDAO {
     }
 
     public void venderProduto(int id) {
-        
+
         try {
             // Inicia a transação
             conn.setAutoCommit(false);
@@ -114,7 +111,32 @@ public class ProdutosDAO {
                 JOptionPane.showMessageDialog(null, "Erro ao restaurar o modo de commit automático: " + e.getMessage());
             }
         }
+    }
 
+    public List<ProdutosDTO> listarProdutosVendidos() {
+
+        List<ProdutosDTO> produtos = new ArrayList<>();
+        try {
+            String sql = "SELECT * FROM produtos WHERE status = 'Vendido'";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(rs.getInt("id"));
+                produto.setNome(rs.getString("nome"));
+                produto.setValor(rs.getInt("valor"));
+                produto.setStatus(rs.getString("status"));
+                produtos.add(produto);
+            }
+
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao recuperar produtos: " + e.getMessage());
+        }
+
+        return produtos;
     }
 
 }
