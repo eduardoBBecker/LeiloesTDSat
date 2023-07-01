@@ -22,11 +22,11 @@ public class ProdutosDAO {
     }
 
     public void cadastrarProduto(ProdutosDTO produto) {
-        
+
         // Inicia a transação
         try {
             conn.setAutoCommit(false);
-            
+
             // Insere o produto no banco de dados
             String sql = "INSERT INTO produtos (nome, valor, status) VALUES (?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -34,7 +34,7 @@ public class ProdutosDAO {
             stmt.setDouble(2, produto.getValor());
             stmt.setString(3, produto.getStatus());
             stmt.executeUpdate();
-            
+
             // Confirma a transação
             conn.commit();
             JOptionPane.showMessageDialog(null, "Produto cadastrado com sucesso!");
@@ -57,7 +57,7 @@ public class ProdutosDAO {
     }
 
     public List<ProdutosDTO> listarProdutos() {
-        
+
         List<ProdutosDTO> produtos = new ArrayList<>();
         try {
             String sql = "SELECT * FROM produtos";
@@ -80,6 +80,41 @@ public class ProdutosDAO {
         }
 
         return produtos;
+    }
+
+    public void venderProduto(int id) {
+        
+        try {
+            // Inicia a transação
+            conn.setAutoCommit(false);
+
+            // Atualiza o status do produto para "vendido" no banco de dados
+            String sql = "UPDATE produtos SET status = ? WHERE id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, "Vendido");
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+
+            // Confirma a transação
+            conn.commit();
+            JOptionPane.showMessageDialog(null, "Produto vendido com sucesso!");
+        } catch (SQLException e) {
+            // Desfaz a transação em caso de erro
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackEx) {
+                JOptionPane.showMessageDialog(null, "Erro ao desfazer transação: " + rollbackEx.getMessage());
+            }
+            JOptionPane.showMessageDialog(null, "Erro ao vender produto: " + e.getMessage());
+        } finally {
+            // Restaura o modo de commit automático
+            try {
+                conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Erro ao restaurar o modo de commit automático: " + e.getMessage());
+            }
+        }
+
     }
 
 }
